@@ -6,20 +6,17 @@ const target = path.join(__dirname, 'files-copy');
 
 fs.stat(target, function (err) {
   if (err) {
-    //  console.log('Нет такой');
     fs.mkdir(`${__dirname}/files-copy`, (err) => {
       if (err) throw err;
-      //console.log('Папка успешно создана');
+
       copyFiles();
     });
   } else {
-    // console.log('Нашел');
     fs.readdir(target, (err, files) => {
       if (err) {
         console.error(err);
         return;
       }
-      //  console.log('Вот он ' + files);
 
       files.forEach((file) => {
         const filePath = path.join(target, file);
@@ -28,8 +25,6 @@ fs.stat(target, function (err) {
             console.error(err);
             return;
           }
-
-          //  console.log(`Файл ${file} удален`);
         });
       });
       copyFiles();
@@ -47,7 +42,6 @@ function copyFiles() {
 
         fs.copyFile(filePath, path.join(target, file), (err) => {
           if (err) throw err;
-          //  console.log(`Файл ${file}  скопирован`);
         });
       });
     }

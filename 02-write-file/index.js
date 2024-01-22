@@ -13,7 +13,6 @@ function createFile() {
 
 fs.stat(file, function (err) {
   if (err) {
-    //console.log('Файла text.txt не существует, создаю новый');
     createFile();
   } else {
     fs.unlink(file, (err) => {
@@ -21,7 +20,6 @@ fs.stat(file, function (err) {
         console.error(err);
         return;
       } else {
-        //console.log('Старый файл text.txt успешно удален. Создан новый файл');
         createFile();
       }
     });
@@ -30,7 +28,6 @@ fs.stat(file, function (err) {
 
 function writeFile() {
   int.question('What do we say to the God of Death? ', (answer) => {
-    //const text = answer.toString;
     if (answer !== 'exit') {
       fs.appendFile(file, answer + '\n', (err) => {
         if (err) throw err;

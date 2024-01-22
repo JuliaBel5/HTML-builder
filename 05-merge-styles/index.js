@@ -1,60 +1,44 @@
 const fs = require('fs');
+const fsp = require('fs/promises');
 const path = require('path');
-const { stat } = require('fs/promises');
+
 const source = path.join(__dirname, 'styles');
 const targetFile = path.join(`${__dirname}/project-dist`, 'bundle.css');
 
-fs.stat(targetFile, function (err) {
-  if (err) {
-    console.log('Файла bundle.css не существует, создаю новый');
-    createBundle();
-  } else {
-    fs.unlink(targetFile, (err) => {
-      if (err) {
-        console.error(err);
-        return;
-      } else {
-        console.log('Старый файл bundle.css успешно удален');
-        createBundle();
-      }
+async function createBundle() {
+  try {
+    await fsp.rm(targetFile, { force: true });
+    const files = await fsp.readdir(source);
+
+    console.log('В папке обнаружены следующие файлы: ' + files);
+
+    const writableStream = fs.createWriteStream(path.join(targetFile), {
+      flags: 'a',
     });
-  }
-});
 
-function createBundle() {
-  fs.readdir(source, (err, files) => {
-    if (err) {
-      console.error(err);
-      return;
-    } else {
-      console.log('В папке обнаружены следующие файлы: ' + files);
+    writableStream.on('finish', () => {
+      console.log('Файл bundle.css успешно сформирован');
+    });
 
-      files.forEach(async (file) => {
-        const filePath = path.join(source, file);
-        const ext = path.extname(filePath);
+    for (const file of files) {
+      const isCss = path.extname(file) === '.css';
 
-        const statData = await stat(filePath);
+      if (!isCss) return;
 
-        if (statData.isFile() && ext === '.css') {
-          const stream = fs.createReadStream(path.join(source, file), 'utf8');
-          let arr = [];
-          stream.on('readable', () => {
-            let data = stream.read();
-            if (data !== null) {
-              arr.push(data);
-              fs.appendFile(targetFile, arr.join(), (err) => {
-                if (err) throw err;
-                console.log(`Файл ${file} успешно скопирован и записан`);
-              });
+      const readableStream = fs.createReadStream(
+        path.join(source, file),
+        'utf8',
+      );
 
-              stream.on('end', () => {
-                return arr;
-              });
-            }
-          });
-        }
+      readableStream.pipe(writableStream);
+
+      readableStream.on('end', () => {
+        console.log(`Файл ${file} успешно скопирован и записан`);
       });
     }
-  });
-  console.log('Файл bundle.css успешно сформирован');
+  } catch (err) {
+    console.error(err);
+  }
 }
+
+createBundle();

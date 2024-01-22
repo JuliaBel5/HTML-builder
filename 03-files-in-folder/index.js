@@ -1,4 +1,3 @@
-//const fs = require('fs');
 const { readdir, stat } = require('fs/promises');
 const path = require('path');
 
