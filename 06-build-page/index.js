@@ -22,7 +22,7 @@ async function createBundle() {
     for (const file of files) {
       const isCss = path.extname(file) === '.css';
 
-      if (!isCss) return;
+      if (!isCss) continue;
 
       const readableStream = fs.createReadStream(
         path.join(source, file),
